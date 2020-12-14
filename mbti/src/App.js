@@ -7,6 +7,8 @@ import Spinner from "react-bootstrap/Spinner";
 import { Bar } from 'react-chartjs-2';
 
 const rand = () => Math.floor(Math.random() * 100);
+const link = "https://www.16personalities.com/fr/la-personnalite-";
+
 const options = {
     scales: {
         yAxes: [
@@ -35,6 +37,17 @@ const App = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [receivedAnswer, setReceivedAnswer] = useState(false);
     const [MBTIPercentage, setMBTIPercentage] = useState([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+
+    const getElementAtEvent = element => {
+        if (!element.length) return;
+
+        const { _datasetIndex: datasetIndex, _index: index } = element[0];
+
+        window.open(`${link}${data.labels[index].toLowerCase()}`, "_blank")
+    };
+
+
+
     const data = {
         labels: ['ISTJ', 'ISTP', 'ESTP', 'ESTJ', 'ISFJ', 'ISFP', "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"],
         datasets: [
@@ -127,7 +140,9 @@ const App = () => {
     } else if (receivedAnswer) {
         return (
             <div className="App">
-                <Bar data={data} options={options}/>
+                <h2>Cliquez sur l'une des colonnes pour obtenir des informations liées au type de personnalité</h2>
+                <Bar data={data} options={options}
+                     getElementAtEvent={getElementAtEvent}/>
                 <Button variant="light" size="lg" onClick={handleReset}>Réinitialiser</Button>
             </div>
         );

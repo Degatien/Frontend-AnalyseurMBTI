@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import "./App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Spinner from "react-bootstrap/Spinner";
 
 const App = () => {
     const [textInput, setTextInput] = useState("");
@@ -12,7 +13,12 @@ const App = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (textInput.length < 1) {
+            window.alert("Veuillez entrer un texte");
+            return;
+        }
         setIsLoading(true);
+        setInterval(() => setReceivedAnswer(true), 4000);
     };
 
     if (!receivedAnswer && !isLoading) {
@@ -27,13 +33,14 @@ const App = () => {
                 </form>
             </div>
         );
-    } else if (receivedAnswer && isLoading) {
+    } else if (!receivedAnswer && isLoading) {
         return (
             <div className="App">
-
+                <Spinner animation="border" variant="light" size="lg" />
+                <h2>Le serveur est en train de traiter votre demande</h2>
             </div>
         );
-    } else if (receivedAnswer && !isLoading) {
+    } else if (receivedAnswer) {
         return (
             <div className="App">
 

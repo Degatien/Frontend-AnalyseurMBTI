@@ -1,0 +1,26 @@
+.Modal-Container {
+    background-color: #282c34;
+    color: white;
+}
+.Modal-Header {
+    background-color: #282c34;
+    color: white;
+}
+.Modal-Body {
+    background-color: #282c34;
+    color: white;
+}
+.Key-Word {
+    color: red
+}
+
+.Key-Word:hover, .Key-Word:active {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
+.Canvas-Container {
+    height: 50vh;
+    width: 70vw;
+}

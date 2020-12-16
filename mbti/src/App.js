@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Spinner from "react-bootstrap/Spinner";
 
 import { Bar } from 'react-chartjs-2';
+import Detailed from './Detailed';
 
 const {url, key} = require('./config');
 
@@ -91,6 +92,7 @@ const App = () => {
     const [textInput, setTextInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [receivedAnswer, setReceivedAnswer] = useState(false);
+    const [seeDetailed, setSeeDetailed] = useState(false);
     const [MBTIPercentage, setMBTIPercentage] = useState([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
     const [MBTIType, setMBTIType] = useState("");
     const [MBTITypePercentage, setMBTITypePercentage] = useState(0);
@@ -187,6 +189,8 @@ const App = () => {
     };
     const handleChange = (event) => setTextInput(event.target.value);
 
+    const handleSeeDetail = () => setSeeDetailed(true);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (textInput.length < 1) {
@@ -205,9 +209,18 @@ const App = () => {
         setMBTIType("");
         setMBTITypePercentage(0);
         setActualData(null);
+        setSeeDetailed(false);
     };
 
-    if (!receivedAnswer && !isLoading) {
+    if (seeDetailed) {
+        return (
+            <div className="App">
+                <Detailed Text={textInput} Datas={actualData}/>
+                <Button variant="light" size="lg" onClick={handleReset}>Réinitialiser</Button>
+            </div>
+        )
+    }
+    else if (!receivedAnswer && !isLoading) {
         return (
             <div className="App">
                 <h1>Bienvenu sur notre application MBTI</h1>
@@ -234,7 +247,10 @@ const App = () => {
                 <div className="Canvas-Container">
                     <Bar data={data} options={options} getElementAtEvent={getElementAtEvent}/>
                 </div>
-                <Button variant="light" size="lg" onClick={handleReset}>Réinitialiser</Button>
+                <div className="Button-Container">
+                    <Button variant="light" size="lg" onClick={handleSeeDetail}>Voir le détail</Button>
+                    <Button variant="light" size="lg" onClick={handleReset}>Réinitialiser</Button>
+                </div>
             </div>
         );
     }

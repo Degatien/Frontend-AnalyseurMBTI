@@ -20,3 +20,7 @@
   height: 80vh;
   width: 100vw;
 }
+
+.Button-Container {
+  display: inline-block;
+}

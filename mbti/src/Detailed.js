@@ -3,32 +3,9 @@ import "./Detailed.css";
 import Modal from "react-bootstrap/Modal";
 import {Bar} from "react-chartjs-2";
 
-const options = {
-    maintainAspectRatio: false,
-    scales: {
-        yAxes: [
-            {
-                ticks: {
-                    fontColor: "white",
-                    beginAtZero: true,
-                    maxTicksLimit: 11,
-                },
-            },
-        ],
-        xAxes: [
-            {
-                ticks: {
-                    fontColor: "white"
-                }
-            }
-        ]
-    },
-};
-
-const link = "https://www.16personalities.com/fr/la-personnalite-";
+import {link, chart_option, labels} from './misc';
 
 const constructGraphFromData = (data) => {
-    const labels = ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"];
     let tab = [];
     for (const label of labels) {
         tab.push((data[`Scored Probabilities for Class "${label}"`] * 100).toFixed(2));
@@ -72,7 +49,7 @@ const Detailed = ({Text, Datas}) => {
         }
     }
 
-    const WordToRender= ({Word, Index}) => {
+    const WordToRender= ({Word}) => {
         if (Word.match("<[0-9]+/>")) {
             const key = Word.substring(Word.indexOf('<'), Word.indexOf('/>') + 2);
             let trueWord = "";
@@ -88,7 +65,7 @@ const Detailed = ({Text, Datas}) => {
     };
 
     const data = {
-        labels : ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"],
+        labels : labels,
         datasets: [
             {
                 label: '% de type MBTI',
@@ -152,12 +129,12 @@ const Detailed = ({Text, Datas}) => {
                     <h2>Le type dominant du mot "{currentKeyWord}" est {MBTIType} avec une précision de {MBTITypePercentage}%</h2>
                     <h2>Cliquez sur l'une des colonnes pour obtenir des informations liées au type de personnalité</h2>
                     <div className="Canvas-Container">
-                        <Bar data={data} options={options} getElementAtEvent={getElementAtEvent}/>
+                        <Bar data={data} options={chart_option} getElementAtEvent={getElementAtEvent}/>
                     </div>
                 </Modal.Body>
             </Modal>
             <h3>Cliquez sur les mots en surbrillance afin de voir comment ils ont influés sur vos résultats</h3>
-            {Text.split(" ").map((word, index) => <WordToRender key={index} Index={index} Word={word} />)}
+            {Text.split(" ").map((word, index) => <WordToRender key={index} Word={word} />)}
         </div>
     );
 

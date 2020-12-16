@@ -6,32 +6,11 @@ import Spinner from "react-bootstrap/Spinner";
 
 import { Bar } from 'react-chartjs-2';
 import Detailed from './Detailed';
+import {link, chart_option, labels} from './misc';
 
 const {url, key} = require('./config');
 
-const link = "https://www.16personalities.com/fr/la-personnalite-";
 
-const options = {
-    maintainAspectRatio: false,
-    scales: {
-        yAxes: [
-            {
-                ticks: {
-                    fontColor: "white",
-                    beginAtZero: true,
-                    maxTicksLimit: 11,
-                },
-            },
-        ],
-        xAxes: [
-            {
-                ticks: {
-                    fontColor: "white"
-                }
-            }
-        ]
-    },
-};
 
 const constructDataFromResult = (results) => {
     let values = {
@@ -52,7 +31,6 @@ const constructDataFromResult = (results) => {
         "ENTP": 0,
         "ENTJ": 0,
     };
-    const labels = ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"];
     let count = 0;
 
     for (const index in results) {
@@ -67,7 +45,6 @@ const constructDataFromResult = (results) => {
     return values;
 };
 const constructGraphFromData = (data) => {
-    const labels = ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"];
     let tab = [];
     for (const label of labels) {
         tab.push((data[label] * 100).toFixed(2));
@@ -77,7 +54,6 @@ const constructGraphFromData = (data) => {
 
 const getHigherPercentage = (data) => {
     let result = {type: "ISTJ", percentage: 0};
-    const labels = ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"];
     for (const label of labels) {
         let actualValue = data[label];
         if (actualValue > result.percentage) {
@@ -141,7 +117,7 @@ const App = () => {
     };
 
     const data = {
-        labels : ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"],
+        labels : labels,
         datasets: [
             {
                 label: '% de type MBTI',
@@ -245,7 +221,7 @@ const App = () => {
                 <h2>Votre type dominant est {MBTIType} avec une précision de {MBTITypePercentage}%</h2>
                 <h2>Cliquez sur l'une des colonnes pour obtenir des informations liées au type de personnalité</h2>
                 <div className="Canvas-Container">
-                    <Bar data={data} options={options} getElementAtEvent={getElementAtEvent}/>
+                    <Bar data={data} options={chart_option} getElementAtEvent={getElementAtEvent}/>
                 </div>
                 <div className="Button-Container">
                     <Button variant="light" size="lg" onClick={handleSeeDetail}>Voir le détail</Button>

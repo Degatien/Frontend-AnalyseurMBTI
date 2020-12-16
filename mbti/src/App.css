@@ -15,3 +15,8 @@
   min-width: 50vw;
   max-width: 80vw;
 }
+
+.Canvas-Container {
+  height: 80vh;
+  width: 100vw;
+}

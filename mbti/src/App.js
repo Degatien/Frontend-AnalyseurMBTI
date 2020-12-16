@@ -6,19 +6,19 @@ import Spinner from "react-bootstrap/Spinner";
 
 import { Bar } from 'react-chartjs-2';
 
-const rand = () => Math.floor(Math.random() * 100);
+const {url, key} = require('./config');
+
 const link = "https://www.16personalities.com/fr/la-personnalite-";
 
 const options = {
+    maintainAspectRatio: false,
     scales: {
         yAxes: [
             {
                 ticks: {
                     fontColor: "white",
                     beginAtZero: true,
-                    suggestedMax: 100,
                     maxTicksLimit: 11,
-                    stepSize: 10
                 },
             },
         ],
@@ -32,24 +32,114 @@ const options = {
     },
 };
 
+const constructDataFromResult = (results) => {
+    let values = {
+        "ISTJ": 0,
+        "ISTP": 0,
+        "ESTP": 0,
+        "ESTJ": 0,
+        "ISFJ": 0,
+        "ISFP": 0,
+        "ESFP": 0,
+        "ESFJ": 0,
+        "INFJ": 0,
+        "INFP": 0,
+        "ENFP": 0,
+        "ENFJ": 0,
+        "INTJ": 0,
+        "INTP": 0,
+        "ENTP": 0,
+        "ENTJ": 0,
+    };
+    const labels = ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"];
+    let count = 0;
+
+    for (const index in results) {
+        count++;
+        for (const label of labels) {
+            values[label] += parseFloat(results[index][`Scored Probabilities for Class "${label}"`]);
+        }
+    }
+    for (const label of labels) {
+        values[label] = values[label] / count;
+    }
+    return values;
+};
+const constructGraphFromData = (data) => {
+    const labels = ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"];
+    let tab = [];
+    for (const label of labels) {
+        tab.push((data[label] * 100).toFixed(2));
+    }
+    return tab;
+};
+
+const getHigherPercentage = (data) => {
+    let result = {type: "ISTJ", percentage: 0};
+    const labels = ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"];
+    for (const label of labels) {
+        let actualValue = data[label];
+        if (actualValue > result.percentage) {
+            result.percentage = actualValue;
+            result.type = label
+        }
+    }
+    return result;
+};
+
 const App = () => {
     const [textInput, setTextInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [receivedAnswer, setReceivedAnswer] = useState(false);
     const [MBTIPercentage, setMBTIPercentage] = useState([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+    const [MBTIType, setMBTIType] = useState("");
+    const [MBTITypePercentage, setMBTITypePercentage] = useState(0);
+    const [actualData, setActualData] = useState(null);
+    const postData = () => {
+        const headers = {
+            "Authorization" : `Bearer ${key}`,
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        };
 
+        const body = {
+            "Inputs": {
+                "input1": [{
+                    "posts": textInput
+                }]
+            }
+        };
+        const options = {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body),
+        };
+        fetch(url,options)
+            .then(response => response.json())
+            .then(data => data["Results"]["output1"])
+            .then((results) => {
+                const data = constructDataFromResult(results);
+                const graph = constructGraphFromData(data);
+                const higher = getHigherPercentage(data);
+                setActualData(results);
+                setMBTIPercentage(graph);
+                setMBTIType(higher.type);
+                setMBTITypePercentage((higher.percentage * 100).toFixed(2));
+                setReceivedAnswer(true);
+                setIsLoading(false);
+            })
+            .catch((errors) => console.log(errors));
+    };
     const getElementAtEvent = element => {
         if (!element.length) return;
 
-        const { _datasetIndex: datasetIndex, _index: index } = element[0];
+        const {_index: index } = element[0];
 
         window.open(`${link}${data.labels[index].toLowerCase()}`, "_blank")
     };
 
-
-
     const data = {
-        labels: ['ISTJ', 'ISTP', 'ESTP', 'ESTJ', 'ISFJ', 'ISFP', "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"],
+        labels : ["ISTJ", "ISTP", "ESTP", "ESTJ", "ISFJ", "ISFP", "ESFP", "ESFJ", "INFJ", "INFP", "ENFP", "ENFJ", "INTJ", "INTP", "ENTP", "ENTJ"],
         datasets: [
             {
                 label: '% de type MBTI',
@@ -104,11 +194,7 @@ const App = () => {
             return;
         }
         setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            setReceivedAnswer(true);
-            setMBTIPercentage([rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand(),rand()]);
-        }, 1000);
+        postData();
     };
 
     const handleReset = () => {
@@ -116,6 +202,9 @@ const App = () => {
         setIsLoading(false);
         setMBTIPercentage([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         setReceivedAnswer(false);
+        setMBTIType("");
+        setMBTITypePercentage(0);
+        setActualData(null);
     };
 
     if (!receivedAnswer && !isLoading) {
@@ -124,7 +213,7 @@ const App = () => {
                 <h1>Bienvenu sur notre application MBTI</h1>
                 <h2>Veuillez entrer un texte ci-dessous. Notre application se chargera de déterminer votre type MBTI</h2>
                 <form onSubmit={handleSubmit}>
-                    <textarea className="Text-Input" type="text" value={textInput} onChange={handleChange} />
+                    <textarea className="Text-Input" value={textInput} onChange={handleChange} />
                     <br/>
                     <Button onClick={handleSubmit} variant="light" size="lg">Envoyer</Button>
                 </form>
@@ -140,9 +229,11 @@ const App = () => {
     } else if (receivedAnswer) {
         return (
             <div className="App">
+                <h2>Votre type dominant est {MBTIType} avec une précision de {MBTITypePercentage}%</h2>
                 <h2>Cliquez sur l'une des colonnes pour obtenir des informations liées au type de personnalité</h2>
-                <Bar data={data} options={options}
-                     getElementAtEvent={getElementAtEvent}/>
+                <div className="Canvas-Container">
+                    <Bar data={data} options={options} getElementAtEvent={getElementAtEvent}/>
+                </div>
                 <Button variant="light" size="lg" onClick={handleReset}>Réinitialiser</Button>
             </div>
         );
